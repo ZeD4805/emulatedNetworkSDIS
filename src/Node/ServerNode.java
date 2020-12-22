@@ -3,7 +3,7 @@ package Node;
 import java.net.*;
 import java.io.*;
 
-public class ServerNode implements Runnable{
+public class ServerNode{
 
     private ServerSocket serverSocket;
     private Socket clientSocket;
@@ -12,30 +12,6 @@ public class ServerNode implements Runnable{
 
     public ServerNode(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-    }
-
-    @Override
-    public void run() {
-        try {
-            System.out.println("Pa de Server");
-            //server loop
-            while (true){
-                startConnection();
-                while (!serverSocket.isClosed()){
-                    String received = in.readLine();
-                    System.out.println("Server received: " + received);
-                    if("close".equals(received)){
-                        close();
-                        System.out.println("Server closed");
-                    }
-
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("Pa de Server 2");
     }
 
     public void startConnection() throws IOException {
@@ -49,5 +25,17 @@ public class ServerNode implements Runnable{
         out.close();
         clientSocket.close();
         serverSocket.close();
+    }
+
+    public boolean isClosed() {
+        return serverSocket.isClosed();
+    }
+
+    public String readLine() throws IOException {
+        return in.readLine();
+    }
+
+    public void sendMessage(String msg){
+        out.println(msg);
     }
 }
