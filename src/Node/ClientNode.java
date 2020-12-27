@@ -19,14 +19,10 @@ public class ClientNode implements Runnable{
     public void run() {
         try {
             Thread.sleep(1000);
-            System.out.println("Pa de Client");
             startConnection();
-
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-
-        System.out.println("Pa de Client 2");
     }
 
     public void startConnection() throws IOException {
@@ -41,7 +37,7 @@ public class ClientNode implements Runnable{
         clientSocket.close();
     }
 
-    public void sendMessage(String msg) throws IOException {
+    public void sendMessage(String msg){
         out.println(msg);
     }
 }

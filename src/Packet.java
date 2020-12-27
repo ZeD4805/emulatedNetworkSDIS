@@ -18,12 +18,12 @@ public class Packet {
         if(index != -1){
             String sub = str.substring(1, index);
             Collections.addAll(args, sub.split("/"));
-            if (args.size() >= 5){
+            if (args.size() > 3){
                 source_port = Integer.parseInt(args.get(0));
                 destination_port = Integer.parseInt(args.get(1));
                 sequence_number = Integer.parseInt(args.get(2));
-                acknowledgement_number = Integer.parseInt(args.get(3));
-                int flags = Integer.parseInt(args.get(4));
+                //acknowledgement_number = Integer.parseInt(args.get(3));
+                int flags = Integer.parseInt(args.get(3)); //4
 
                 if (flags/100 == 1){
                     SYN = true;
@@ -36,8 +36,12 @@ public class Packet {
                 if (flags == 1){
                     FIN = true;
                 }
-                for(int i=0 ; i<4; i++)
+                args.subList(0, 4).clear();
+
+                if (args.size() > 0){
+                    delay = Integer.parseInt(args.get(0));
                     args.remove(0);
+                }
             }
 
         }
@@ -48,7 +52,11 @@ public class Packet {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder("<" + source_port + "/" + destination_port + "/" + sequence_number + "/" + acknowledgement_number + "/" + ((SYN ? 100 : 0) + (ACK ? 10 : 0) + (FIN ? 1 : 0)));
+        StringBuilder result = new StringBuilder("<" + source_port +
+                                                "/" + destination_port +
+                                                "/" + sequence_number +
+                                                //"/" + acknowledgement_number +
+                                                "/" + ((SYN ? 100 : 0) + (ACK ? 10 : 0) + (FIN ? 1 : 0)));
         for (String str:args){
             result.append("/").append(str);
         }
@@ -61,6 +69,9 @@ public class Packet {
     int sequence_number;
     int acknowledgement_number;
     boolean SYN = false, ACK=false, FIN=false;
+
+    int delay = 0;
+
     ArrayList<String> args; //can also contain flags like SYN ACK & FIN
     String data;
 }

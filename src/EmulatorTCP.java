@@ -1,76 +1,113 @@
 import Node.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Random;
+import java.io.*;
 import java.util.concurrent.TimeoutException;
 
 public class EmulatorTCP implements Runnable{
-    private ServerNode serverNode;
+    private final ServerNode serverNode;
     private ClientNode clientNode;
-    private OutputStream out;
-    private InputStream in;
+    private OutputStream outputStream;
+    private InputStream inputStream;
+    private PrintWriter out;
+    private BufferedReader in;
     ProbabilityCalculator probabilityCalculator;
+
+    int acknowledgementNumber = 0;
+    boolean SYN, ACK, FIN;
+
+    FileWriter fw;
 
     EmulatorTCP(int port) throws IOException {
         serverNode = new ServerNode(port);
-        probabilityCalculator = new ProbabilityCalculator((int) 1e9, 1000);
+        probabilityCalculator = new ProbabilityCalculator((int) 1e9,
+                                            1000,
+                                            1000000,
+                                            1000,
+                                            100);
+        fw = new FileWriter("log.txt");
+        fw.write(probabilityCalculator.toString());
     }
 
-    public void startConnection() throws IOException, TimeoutException {
-        if(!probabilityCalculator.isTrue())
-            serverNode.startConnection();
-        else{ //no reply
-            System.out.println("Start connection timed out " + probabilityCalculator.toString());
-            throw new TimeoutException(); //maybe?
-        }
+    public void startConnection() throws IOException{
+        serverNode.startConnection();
+        String synPacket = serverNode.readLine();
+        fw.write("Received: " + synPacket + "\n");
+
+        SYN = true;
+        ACK = true;
+        FIN = false;
+        sendMessage("");
+
     }
 
     @Override
     public void run() {
-        try {
-            while (true){
-                startConnection();
-                while (!serverNode.isClosed()){
-                    String received = serverNode.readLine();
-                    Packet pReceived = new Packet(received);
+        while (true){
+            try {
+            startConnection();
+            while (!serverNode.isClosed()){
+                String received = serverNode.readLine();
+                Packet pReceived = new Packet(received);
+                fw.write("Received: " + pReceived.toString() + "\n");
 
-                    if(pReceived.args.size() > 0){
-                        String packetType = pReceived.args.get(0);
-                        if("close".equals(packetType)){
-                            close();
-                            System.out.println("Server closed");
-                        }
-                        else if("delay".equals(packetType) && pReceived.args.size() > 1){
-                            int delayAmount = Integer.parseInt(pReceived.args.get(1), 10);
-                            Thread.sleep(delayAmount);
-                            //add to inputStream
-                           // Charset utf8 = StandardCharsets.UTF_8;
-                            //out.write(utf8.encode(pReceived.data).array());
-                        }
-                    }
+                if(true){ //TODO use ProbabilityCalculator to simulate packet loss
+                    sendACK();
 
-                    System.out.println(pReceived.toString());
+                    resetFlags();
+                    sendMessage(pReceived.data);
                 }
+
+                /*if(pReceived.args.size() > 0){
+                    String packetType = pReceived.args.get(0);
+                    if("close".equals(packetType)){
+                        close();
+                        System.out.println("Server closed");
+                    }
+                    else if("delay".equals(packetType) && pReceived.args.size() > 1){
+                        int delayAmount = Integer.parseInt(pReceived.args.get(1), 10);
+                        Thread.sleep(delayAmount);
+                        //add to inputStream
+                        out.println(pReceived.data);
+                    }
+                }*/
+                System.out.println(pReceived.toString());
             }
-        } catch (IOException | TimeoutException | InterruptedException e) {
-            e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+                break;
+            }
         }
-    }
-
-
-    public void syn_ack(){
 
     }
 
-    public void sendMessage(String msg) {
+    public void resetFlags(){
+        SYN = false;
+        ACK = false;
+        FIN = false;
+    }
+
+    public void sendACK() throws IOException {
+        SYN = false;
+        ACK = true;
+        FIN = false;
+        sendMessage("");
+    }
+
+    public void sendMessage(String msg) throws IOException {
+        String prefix = "<" + serverNode.getSourcePort() + "/" +
+                        serverNode.getDestinationPort() + "/" +
+                        //acknowledgementNumber + "/" +
+                        ((SYN ? 100 : 0) + (ACK ? 10 : 0) + (FIN ? 1 : 0)) + "/"+
+                        probabilityCalculator.getDelay();
+
+        msg = prefix + ">" + msg;
+
         serverNode.sendMessage(msg);
+        fw.write("Sent: " + msg + "\n");
     }
 
     public void close() throws IOException {
         serverNode.close();
+        fw.close();
     }
 }

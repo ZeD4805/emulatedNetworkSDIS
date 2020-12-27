@@ -5,10 +5,10 @@ import java.io.*;
 
 public class ServerNode{
 
-    private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private PrintWriter out;
-    private BufferedReader in;
+    ServerSocket serverSocket;
+    Socket clientSocket;
+    PrintWriter out;
+    BufferedReader in;
 
     public ServerNode(int port) throws IOException {
         serverSocket = new ServerSocket(port);
@@ -36,7 +36,14 @@ public class ServerNode{
     }
 
     public void sendMessage(String msg){
-
         out.println(msg);
+    }
+
+    public int getSourcePort(){
+        return serverSocket.getLocalPort();
+    }
+
+    public int getDestinationPort(){
+        return clientSocket.getPort();
     }
 }
