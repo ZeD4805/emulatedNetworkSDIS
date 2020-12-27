@@ -36,6 +36,7 @@ public class ServerNode{
     }
 
     public void sendMessage(String msg){
+
         out.println(msg);
     }
 }

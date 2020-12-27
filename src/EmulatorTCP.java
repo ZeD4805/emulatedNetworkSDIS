@@ -48,8 +48,8 @@ public class EmulatorTCP implements Runnable{
                             int delayAmount = Integer.parseInt(pReceived.args.get(1), 10);
                             Thread.sleep(delayAmount);
                             //add to inputStream
-                            Charset utf8 = StandardCharsets.UTF_8;
-                            out.write(utf8.encode(pReceived.data).array());
+                           // Charset utf8 = StandardCharsets.UTF_8;
+                            //out.write(utf8.encode(pReceived.data).array());
                         }
                     }
 
@@ -62,6 +62,9 @@ public class EmulatorTCP implements Runnable{
     }
 
 
+    public void syn_ack(){
+
+    }
 
     public void sendMessage(String msg) {
         serverNode.sendMessage(msg);
