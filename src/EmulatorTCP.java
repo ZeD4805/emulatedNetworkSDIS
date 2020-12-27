@@ -18,7 +18,7 @@ public class EmulatorTCP implements Runnable{
 
     FileWriter fw;
 
-    EmulatorTCP(int port, PipedInputStream pipedInputStream, PipedOutputStream pipedOutputStream) throws IOException {
+    EmulatorTCP(int port) throws IOException {
         serverNode = new ServerNode(port);
         probabilityCalculator = new ProbabilityCalculator((int) 1e9,
                                             1000,

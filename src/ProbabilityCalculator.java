@@ -41,6 +41,6 @@ public class ProbabilityCalculator {
                 ", packetLossProb=" + packetLossProb +
                 ", delayMean=" + delayMean +
                 ", delayStandardDeviation=" + delayStandardDeviation +
-                '}';
+                '}' + "\n";
     }
 }

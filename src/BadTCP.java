@@ -2,7 +2,7 @@ import java.io.*;
 
 public class BadTCP {
     BadTCP(int port) throws IOException {
-        emulatorTCP = new EmulatorTCP(port, pIn, pOut);
+        emulatorTCP = new EmulatorTCP(port);
 
         pIn = new PipedInputStream(emulatorTCP.getPipedOutputStream());
         pOut = new PipedOutputStream(emulatorTCP.getPipedInputStream());

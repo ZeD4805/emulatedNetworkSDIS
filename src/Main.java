@@ -33,10 +33,10 @@ public class Main {
 
         Thread.sleep(3000);
 
-        String read;
+        /*String read;
         while ((read = bufR.readLine()) != null){
             System.out.println("From bufR: " + read);
-        }
+        }*/
 
         Thread.sleep(3000);
         clientNode.stopConnection();
