@@ -6,10 +6,11 @@ import java.util.concurrent.TimeoutException;
 public class EmulatorTCP implements Runnable{
     private final ServerNode serverNode;
     private ClientNode clientNode;
-    private OutputStream outputStream;
-    private InputStream inputStream;
-    private PrintWriter out;
-    private BufferedReader in;
+    PipedInputStream pIn;
+    BufferedReader in;
+    PipedOutputStream pOut;
+    PrintWriter out;
+
     ProbabilityCalculator probabilityCalculator;
 
     int acknowledgementNumber = 0;
@@ -17,15 +18,36 @@ public class EmulatorTCP implements Runnable{
 
     FileWriter fw;
 
-    EmulatorTCP(int port) throws IOException {
+    EmulatorTCP(int port, PipedInputStream pipedInputStream, PipedOutputStream pipedOutputStream) throws IOException {
         serverNode = new ServerNode(port);
         probabilityCalculator = new ProbabilityCalculator((int) 1e9,
                                             1000,
                                             1000000,
                                             1000,
                                             100);
+
+        //initialize piped streams
+        pOut = new PipedOutputStream();
+        out = new PrintWriter(pOut);
+
+        pIn = new PipedInputStream();
+        in = new BufferedReader(new InputStreamReader(pIn));
+
+        //initialize logging
         fw = new FileWriter("log.txt");
         fw.write(probabilityCalculator.toString());
+
+        //start "run" thread
+        Thread t = new Thread(this);
+        t.start();
+    }
+
+    PipedInputStream getPipedInputStream(){
+        return pIn;
+    }
+
+    PipedOutputStream getPipedOutputStream(){
+        return pOut;
     }
 
     public void startConnection() throws IOException{
@@ -47,10 +69,14 @@ public class EmulatorTCP implements Runnable{
             startConnection();
             while (!serverNode.isClosed()){
                 String received = serverNode.readLine();
+                if(received == null)
+                    continue;
                 Packet pReceived = new Packet(received);
                 fw.write("Received: " + pReceived.toString() + "\n");
 
                 if(true){ //TODO use ProbabilityCalculator to simulate packet loss
+                    out.write(pReceived.data);
+
                     sendACK();
 
                     resetFlags();
@@ -96,7 +122,7 @@ public class EmulatorTCP implements Runnable{
     public void sendMessage(String msg) throws IOException {
         String prefix = "<" + serverNode.getSourcePort() + "/" +
                         serverNode.getDestinationPort() + "/" +
-                        //acknowledgementNumber + "/" +
+                        acknowledgementNumber + "/" +
                         ((SYN ? 100 : 0) + (ACK ? 10 : 0) + (FIN ? 1 : 0)) + "/"+
                         probabilityCalculator.getDelay();
 

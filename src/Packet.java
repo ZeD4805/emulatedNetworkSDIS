@@ -1,3 +1,4 @@
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +19,7 @@ public class Packet {
         if(index != -1){
             String sub = str.substring(1, index);
             Collections.addAll(args, sub.split("/"));
-            if (args.size() > 3){
+            if (args.size() > 4){
                 source_port = Integer.parseInt(args.get(0));
                 destination_port = Integer.parseInt(args.get(1));
                 sequence_number = Integer.parseInt(args.get(2));
@@ -36,12 +37,9 @@ public class Packet {
                 if (flags == 1){
                     FIN = true;
                 }
-                args.subList(0, 4).clear();
+                delay = Integer.parseInt(args.get(4)); //5
 
-                if (args.size() > 0){
-                    delay = Integer.parseInt(args.get(0));
-                    args.remove(0);
-                }
+                args.subList(0, 5).clear();
             }
 
         }
@@ -56,7 +54,8 @@ public class Packet {
                                                 "/" + destination_port +
                                                 "/" + sequence_number +
                                                 //"/" + acknowledgement_number +
-                                                "/" + ((SYN ? 100 : 0) + (ACK ? 10 : 0) + (FIN ? 1 : 0)));
+                                                "/" + ((SYN ? 100 : 0) + (ACK ? 10 : 0) + (FIN ? 1 : 0)) +
+                                                "/" + delay);
         for (String str:args){
             result.append("/").append(str);
         }
