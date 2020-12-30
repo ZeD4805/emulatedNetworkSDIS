@@ -4,15 +4,11 @@ import java.net.Socket;
 public class BadSocket extends Socket implements Runnable {
     BadSocket() throws IOException {
         super();
-        reader = new BufferedInputStream(super.getInputStream());
-    }
-
-    BadSocket(Socket s) throws IOException {
-        super(s.getInetAddress(), s.getPort(), s.getLocalAddress(), s.getLocalPort());
     }
 
     @Override
     public InputStream getInputStream() throws IOException {
+        reader = new BufferedInputStream(super.getInputStream());
         return new PipedInputStream(pOut);
     }
 
