@@ -33,10 +33,6 @@ public class ProbabilityCalculator {
         return delayMean + (int)(r.nextGaussian() * delayStandardDeviation);
     }
 
-    int getScale(){
-        return scale;
-    }
-
     @Override
     public String toString() {
         return "ProbabilityCalculator{" +

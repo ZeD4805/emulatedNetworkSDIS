@@ -8,6 +8,11 @@ public class BadSocket extends Socket implements Runnable {
         pc = new ProbabilityCalculator(scale, scale, 10, 400, 2);
     }
 
+    BadSocket(int scale, int spontaneousCloseProb, int packetLossProb, int delayMean, int delayStandardDeviation){
+        super();
+        pc = new ProbabilityCalculator(scale, spontaneousCloseProb, packetLossProb, delayMean, delayStandardDeviation);
+    }
+
     @Override
     public InputStream getInputStream() throws IOException {
         pOut = new PipedOutputStream();

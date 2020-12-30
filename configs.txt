@@ -1,0 +1,12 @@
+1: Buffered vs Unbuffered
+WaveSender
+    send freq 500/30
+WavePlaya
+    graph update 1000/30
+    data update 250/30
+BadSocket
+    delay prob 10/1000
+    delay mean 400
+    delay std dev. 2
+
+2:
