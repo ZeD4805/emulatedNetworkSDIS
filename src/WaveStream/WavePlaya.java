@@ -3,46 +3,77 @@ import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.util.Arrays;
+
 /** Creates a simple real-time chart */
-public class WavePlaya {
+public class WavePlaya implements Runnable{
 
-    @SuppressWarnings({"InfiniteLoopStatement", "BusyWait"})
-    public static void main(String[] args) throws Exception {
+    public WavePlaya(Socket socket, int graphLen){
+        data = new double[2][];
+        data[0] = new double[graphLen]; //x
+        data[1] = new double[graphLen]; //y
+        for (int i = 0; i < graphLen; i++) {
+            data[0][i] = i;
+            data[1][i] = 0;
+        }
 
-        double phase = 0;
-        double[][] initdata = getSineData(phase);
+        this.socket = socket;
+    }
 
-        // Create Chart
+    @SuppressWarnings("BusyWait")
+    @Override
+    public void run() {
         final XYChart chart =
                 QuickChart.getChart(
-                        "Simple XChart Real-time Demo", "Radians", "Sine", "sine", initdata[0], initdata[1]);
+                        "Sine wave double values reception", "x", "y", "received", data[0], data[1]);
 
-        // Show it
         final SwingWrapper<XYChart> sw = new SwingWrapper<>(chart);
         sw.displayChart();
 
-        while (true) {
+        try {
+            in = new DataInputStream(socket.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
 
-            phase += 2 * Math.PI * 2 / 20.0;
+        double newValue;
+        while (!socket.isClosed()){
+            try {
+                if(in.available() == 0){
+                    newValue = data[1][data[1].length - 1];
+                    updateData(newValue);
+                }
+                else{
+                    while (in.available() != 0){
+                        newValue = in.readDouble();
+                        updateData(newValue);
+                    }
+                }
 
-            Thread.sleep(100);
-
-            final double[][] data = getSineData(phase);
-
-            chart.updateXYSeries("sine", data[0], data[1], null);
-            sw.repaintChart();
+                Thread.sleep(1000/30); //60 fps gamer style 8^)
+                chart.updateXYSeries("received", data[0], data[1], null);
+                sw.repaintChart();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private static double[][] getSineData(double phase) {
-
-        double[] xData = new double[100];
-        double[] yData = new double[100];
-        for (int i = 0; i < xData.length; i++) {
-            double radians = phase + (2 * Math.PI / xData.length * i);
-            xData[i] = radians;
-            yData[i] = Math.sin(radians);
+    private void updateData(double newValue){
+        if (data[0].length - 1 >= 0){
+            System.arraycopy(data[1], 1, data[1], 0, data[1].length - 1);
         }
-        return new double[][] {xData, yData};
+        data[1][data[1].length - 1] = newValue;
     }
+
+
+    double[][] data;
+    DataInputStream in;
+
+    Socket socket;
 }

@@ -9,7 +9,7 @@ public class BadServerSocket extends ServerSocket {
     }
 
     @Override
-    public Socket accept() throws IOException {
+    public BadSocket accept() throws IOException {
         BadSocket b = new BadSocket();
         this.implAccept(b);
 
