@@ -8,11 +8,13 @@ import org.knowm.xchart.style.theme.Theme;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
 
 public class WavePlaya implements Runnable{
-    public WavePlaya(Socket socket, int graphLen, int graphUpdatePeriod, int dataUpdatePeriod){
+    public WavePlaya(Socket socket, int graphLen, int graphUpdatePeriod, int dataUpdatePeriod) throws IOException {
         data = new double[2][];
         data[0] = new double[graphLen]; //x
         data[1] = new double[graphLen]; //y
@@ -23,8 +25,11 @@ public class WavePlaya implements Runnable{
 
         this.graphUpdatePeriod = graphUpdatePeriod;
         this.dataUpdatePeriod = dataUpdatePeriod;
+        catchup = false;
 
         this.socket = socket;
+        if(socket.isClosed())
+            socket.connect(socket.getLocalSocketAddress());
 
         Thread t = new Thread(this);
         t.start();
@@ -40,14 +45,20 @@ public class WavePlaya implements Runnable{
         sw.displayChart();
 
         Thread t = new Thread(){
+            @SuppressWarnings("InfiniteLoopStatement")
             public void run(){
                 try {
-                    while (!socket.isClosed()){
-                        Thread.sleep(graphUpdatePeriod); //60 fps gamer style 8^)
-                        chart.updateXYSeries("received", data[0], data[1], null);
-                        sw.repaintChart();
+                    while (true){
+                        while (!socket.isClosed()){
+                            Thread.sleep(graphUpdatePeriod); //60 fps gamer style 8^)
+
+                            chart.updateXYSeries("received", data[0], data[1], null);
+                            sw.repaintChart();
+                        }
+                        socket.connect(socket.getLocalSocketAddress()); //if socket closed, reopen it
                     }
-                } catch (InterruptedException e) {
+
+                } catch (InterruptedException | IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -69,10 +80,12 @@ public class WavePlaya implements Runnable{
                     updateData(newValue);
                 }
                 else{
+                    catchup = true;
                     while (in.available() != 0){ //if - consume one at a time //while - try to get as many asap
                         newValue = in.readDouble();
                         updateData(newValue);
                     }
+                    catchup = false;
                 }
                 /*newValue = in.readDouble();
                 updateData(newValue);*/
@@ -99,6 +112,8 @@ public class WavePlaya implements Runnable{
 
     int graphUpdatePeriod;
     int dataUpdatePeriod;
+
+    boolean catchup;
 
     Socket socket;
 }

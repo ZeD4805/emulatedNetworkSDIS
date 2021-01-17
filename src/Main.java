@@ -48,7 +48,7 @@ public class Main {
 
         Socket socket2 = serverSocket.accept();
 
-        WaveSender waveSender2 = new WaveSender(socket2, 30, 250/30);
+        WaveSender waveSender2 = new WaveSender(socket2, 60, 250/60);
         WavePlaya wavePlaya2 = new WavePlaya(badClientSocket2, 300, 1000/30, 1000/60);
     }
 }

@@ -2,6 +2,7 @@ package WaveStream;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 public class WaveSender implements Runnable {
@@ -21,14 +22,14 @@ public class WaveSender implements Runnable {
     @Override
     public void run() {
         while (!socket.isClosed()){
-            current = (current+1)% sendPeriod;
+            current = (current+1)% wavePeriod;
             try {
-                Thread.sleep(250/30);
+                Thread.sleep(sendPeriod);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            double res = Math.sin((current / (double) sendPeriod) * Math.PI * 2);
+            double res = Math.sin((current / (double) wavePeriod) * Math.PI * 2);
             try {
                 printWriter.writeDouble(res);
             } catch (IOException e) {

@@ -5,7 +5,7 @@ public class BadSocket extends Socket implements Runnable {
     BadSocket() {
         super();
         int scale = (int) 1e3;
-        pc = new ProbabilityCalculator(scale, scale, 10, 400, 2);
+        pc = new ProbabilityCalculator(scale, scale, 10, 400, 50);
     }
 
     BadSocket(int scale, int spontaneousCloseProb, int packetLossProb, int delayMean, int delayStandardDeviation){
