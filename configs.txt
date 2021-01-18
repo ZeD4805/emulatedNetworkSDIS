@@ -4,7 +4,7 @@ WaveSender
 WavePlaya
     graph update 1000/30
     data update 250/30
-BadSocket
+BadSockets.BadSocket
     delay prob 10/1000
     delay mean 400
     delay std dev. 2

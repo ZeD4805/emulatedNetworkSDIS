@@ -6,7 +6,7 @@ import java.net.Socket;
 
 public class WaveSenderServer {
     @SuppressWarnings("InfiniteLoopStatement")
-    WaveSenderServer(int port) throws IOException {
+    public WaveSenderServer(int port, int wavePeriod, int sendPeriod) throws IOException {
         this.serverSocket = new ServerSocket(port);
 
         while(true){
@@ -15,7 +15,7 @@ public class WaveSenderServer {
             Thread t = new Thread(){
                 public void run(){
                     try {
-                        WaveSender waveSender = new WaveSender(acceptedSocket, 30, 250/30);
+                        WaveSender waveSender = new WaveSender(acceptedSocket, wavePeriod, sendPeriod);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

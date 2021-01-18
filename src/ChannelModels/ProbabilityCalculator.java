@@ -1,3 +1,5 @@
+package ChannelModels;
+
 import java.util.Random;
 
 public class ProbabilityCalculator {
@@ -8,7 +10,7 @@ public class ProbabilityCalculator {
     int delayStandardDeviation;
 
     private final Random r;
-    ProbabilityCalculator(int scale, int spontaneousCloseProb, int packetLossProb, int delayMean, int delayStandardDeviation){
+    public ProbabilityCalculator(int scale, int spontaneousCloseProb, int packetLossProb, int delayMean, int delayStandardDeviation){
         r = new Random();
         this.scale = scale;
         this.spontaneousCloseProb = spontaneousCloseProb;
@@ -25,22 +27,11 @@ public class ProbabilityCalculator {
         return ((r.nextInt(scale)) < spontaneousCloseProb);
     }
 
-    boolean packetLoss(){
+    public boolean packetLoss(){
         return ((r.nextInt(scale)) < packetLossProb);
     }
 
-    int getDelay(){
+    public int getDelay(){
         return delayMean + (int)(r.nextGaussian() * delayStandardDeviation);
-    }
-
-    @Override
-    public String toString() {
-        return "ProbabilityCalculator{" +
-                "scale=" + scale +
-                ", spontaneousCloseProb=" + spontaneousCloseProb +
-                ", packetLossProb=" + packetLossProb +
-                ", delayMean=" + delayMean +
-                ", delayStandardDeviation=" + delayStandardDeviation +
-                '}' + "\n";
     }
 }

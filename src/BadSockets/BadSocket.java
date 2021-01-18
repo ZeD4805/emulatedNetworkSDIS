@@ -1,14 +1,20 @@
+package BadSockets;
+
+
+
+import ChannelModels.ProbabilityCalculator;
+
 import java.io.*;
 import java.net.Socket;
 
 public class BadSocket extends Socket implements Runnable {
-    BadSocket() {
+    public BadSocket() {
         super();
         int scale = (int) 1e3;
         pc = new ProbabilityCalculator(scale, scale, 10, 400, 50);
     }
 
-    BadSocket(int scale, int spontaneousCloseProb, int packetLossProb, int delayMean, int delayStandardDeviation){
+    public BadSocket(int scale, int spontaneousCloseProb, int packetLossProb, int delayMean, int delayStandardDeviation){
         super();
         pc = new ProbabilityCalculator(scale, spontaneousCloseProb, packetLossProb, delayMean, delayStandardDeviation);
     }
@@ -31,7 +37,7 @@ public class BadSocket extends Socket implements Runnable {
 
         while (!super.isClosed()) {
             try {
-                if ((count = reader.read(byteBuf)) != -1) {
+                if ((count = reader.read(byteBuf)) != -1) { //while
                     if(pc.packetLoss())
                         Thread.sleep(pc.getDelay());
                     pOut.write(byteBuf, 0, count);
