@@ -23,7 +23,7 @@ public class ProbabilityCalculator {
         return r.nextInt();
     }
 
-    boolean spontaneousClose(){
+    public boolean spontaneousClose(){
         return ((r.nextInt(scale)) < spontaneousCloseProb);
     }
 

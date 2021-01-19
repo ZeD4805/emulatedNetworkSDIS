@@ -13,29 +13,7 @@ public class FileTransferServer {
         while(true){
             Socket acceptedSocket = serverSocket.accept();
 
-            DataOutputStream out;
-            DataInputStream in;
-            try {
-
-                out = new DataOutputStream(acceptedSocket.getOutputStream());
-                in = new DataInputStream(acceptedSocket.getInputStream());
-
-                String receivedStr = new String(in.readAllBytes());
-                int remaining = Integer.parseInt(receivedStr);
-                System.out.println(" " + remaining);
-
-                for (int i = 0; i < remaining; i++) {
-                    out.write(new byte[256]);
-                    Thread.sleep(1); //actually idk
-                    System.out.println("Sending packet " + i);
-                }
-
-                while (acceptedSocket.isConnected());
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            /*Thread t = new Thread(){
+            Thread t = new Thread(){
                 public void run(){
                     DataOutputStream out;
                     DataInputStream in;
@@ -44,23 +22,20 @@ public class FileTransferServer {
                         out = new DataOutputStream(acceptedSocket.getOutputStream());
                         in = new DataInputStream(acceptedSocket.getInputStream());
 
-                        String receivedStr = new String(in.readAllBytes());
-                        int remaining = Integer.parseInt(receivedStr);
-                        System.out.println(" " + remaining);
+                        int remaining = in.readInt();
+                        System.out.println("Sending remaining " + remaining);
 
-                        for (int i = 0; i < remaining; i++) {
+                        for (int i = 0; !acceptedSocket.isClosed() && i < remaining; i++) {
                             out.write(new byte[256]);
                             Thread.sleep(1); //actually idk
-                            System.out.println("Sending packet " + i);
                         }
 
-                        while (acceptedSocket.isConnected());
+                        acceptedSocket.close();
                     } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
                     }
                 }
             };
-            t.start();*/
+            t.start();
         }
     }
 }

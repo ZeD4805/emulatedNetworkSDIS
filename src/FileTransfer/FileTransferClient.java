@@ -17,22 +17,25 @@ public class FileTransferClient {
         Socket socket = null;
 
         while (receiveNum > 0){
-            socket = new BadSocket();
-
-            socket.connect(new InetSocketAddress(address, port));
-
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            String send = "" + receiveNum;
-            out.write(send.getBytes());
-            System.out.println(receiveNum);
 
             try {
-                while (receiveNum > 0){
+                socket = new BadSocket((int)1e9, (int)1e7 * 3, 100, 10, 1);
+
+                socket.connect(new InetSocketAddress(address, port));
+
+                DataInputStream in = new DataInputStream(socket.getInputStream());
+                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                Thread.sleep(30);
+
+                out.writeInt(receiveNum);
+                System.out.println("Still need " + receiveNum);
+
+                while (!socket.isClosed() && receiveNum > 0){
                     in.read(new byte[256]);
                     receiveNum--;
                 }
-            }catch (IOException e){ //socket closed
+            }catch (IOException | InterruptedException e){ //socket closed
+                //e.printStackTrace();
             }
         }
 
