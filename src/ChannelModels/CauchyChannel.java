@@ -1,10 +1,19 @@
 package ChannelModels;
 
-public class RealisticCauchyChannel extends ChannelModel {
+/**
+ * Cauchy channel model
+ */
+public class CauchyChannel extends ChannelModel {
 
-    public RealisticCauchyChannel(double spontaneousCloseProb, float cauchyMean, float cauchyScale, float cauchyNoticeableT){
+    /**
+     * Constructor for Cauchy Channel
+     *
+     * @param spontaneousCloseProb probability to drop connection at each packet
+     * @param cauchyScale scale factor of cauchy distribution
+     * @param cauchyNoticeableT mean/threshold of distribution values
+     */
+    public CauchyChannel(double spontaneousCloseProb, double cauchyScale, double cauchyNoticeableT){
         this.spontaneousCloseProb = spontaneousCloseProb;
-        this.cauchyMean = cauchyMean;
         this.cauchyScale = cauchyScale;
         this.cauchyNoticeableT = cauchyNoticeableT;
 
@@ -20,7 +29,7 @@ public class RealisticCauchyChannel extends ChannelModel {
     public boolean packetLoss() {
         double x = random.nextFloat();
 
-        lastDelay = cauchyScale * Math.tan(Math.PI * x - Math.PI/2) + cauchyNoticeableT; //inverse commulative Cauchy to map a cauchy distribution to [0, 1.0]
+        lastDelay = cauchyScale * Math.tan(Math.PI * x - Math.PI/2) - cauchyNoticeableT; //inverse commulative Cauchy to map a cauchy distribution to [0, 1.0]
 
         return lastDelay > 0;
     }
@@ -39,7 +48,6 @@ public class RealisticCauchyChannel extends ChannelModel {
 
     double spontaneousCloseProb;
 
-    double cauchyMean;
     double cauchyScale;
     double cauchyNoticeableT;
 }

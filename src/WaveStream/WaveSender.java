@@ -5,8 +5,19 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * Sends sin wave to WavePlayeer
+ */
 public class WaveSender implements Runnable {
 
+    /**
+     * Constructor
+     *
+     * @param socket socket
+     * @param wavePeriod wave period (30 points for a wave create a wave with period 30)
+     * @param sendPeriod float sending interval, a value is sent every sendPeriod milliseconds
+     * @throws IOException from Socket.getOutputStream
+     */
     public WaveSender(Socket socket, int wavePeriod, int sendPeriod) throws IOException { //thread sleep for sending may be needed
         this.socket = socket;
         printWriter = new DataOutputStream(socket.getOutputStream());

@@ -1,24 +1,32 @@
 package WaveStream;
+
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
-import org.knowm.xchart.internal.ChartBuilder;
-import org.knowm.xchart.internal.chartpart.Chart;
-import org.knowm.xchart.style.theme.Theme;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Arrays;
 
-public class WavePlaya implements Runnable{
-    public WavePlaya(Socket socket, int graphLen, int graphUpdatePeriod, int dataUpdatePeriod) throws IOException {
+/**
+ * Receives float values from a WaveSender and displays them on a graph of xChart.
+ * Graph length (point number), graph update period and data update period can all be set on the constructor.
+ */
+public class WavePlayer implements Runnable{
+    /**
+     * Constructor for WavePlayer
+     * @param socket socket to use
+     * @param graphLen number of points in graph
+     * @param graphTitle title of graph
+     * @param graphUpdatePeriod period in milliseconds after which to update the graph (example 1000/30 for 30 updates per second)
+     * @param dataUpdatePeriod period in milliseconds after which to update the data
+     * @throws IOException Socket.connect may throw exception
+     */
+    public WavePlayer(Socket socket, String graphTitle, int graphLen, int graphUpdatePeriod, int dataUpdatePeriod) throws IOException {
         data = new double[2][];
         data[0] = new double[graphLen]; //x
-        data[1] = new double[graphLen]; //y
-        for (int i = 0; i < graphLen; i++) {
+        data[1] = new double[graphLen]; //y (sin values)
+        for (int i = 0; i < graphLen; i++) { //graph initialization
             data[0][i] = i;
             data[1][i] = 0;
         }
@@ -33,6 +41,8 @@ public class WavePlaya implements Runnable{
 
         Thread t = new Thread(this);
         t.start();
+
+        this.graphTitle = graphTitle;//"Sine wave double values reception";
     }
 
     @SuppressWarnings("BusyWait")
@@ -40,17 +50,18 @@ public class WavePlaya implements Runnable{
     public void run() {
         final XYChart chart =
                 QuickChart.getChart(
-                        "Sine wave double values reception", "x", "y", "received", data[0], data[1]);
+                        graphTitle, "x", "y", "received", data[0], data[1]);
         final SwingWrapper<XYChart> sw = new SwingWrapper<>(chart);
         sw.displayChart();
 
+        //extra graph update thread
         Thread t = new Thread(){
             @SuppressWarnings("InfiniteLoopStatement")
             public void run(){
                 try {
                     while (true){
                         while (!socket.isClosed()){
-                            Thread.sleep(graphUpdatePeriod); //60 fps gamer style 8^)
+                            Thread.sleep(graphUpdatePeriod);
 
                             chart.updateXYSeries("received", data[0], data[1], null);
                             sw.repaintChart();
@@ -73,7 +84,7 @@ public class WavePlaya implements Runnable{
         }
 
             double newValue;
-        while (!socket.isClosed()){
+        while (!socket.isClosed()){ //data update cycle
             try {
                 if(in.available() == 0){
                     newValue = data[1][data[1].length - 1];
@@ -87,13 +98,9 @@ public class WavePlaya implements Runnable{
                     }
                     catchup = false;
                 }
-                /*newValue = in.readDouble();
-                updateData(newValue);*/
 
                 Thread.sleep(dataUpdatePeriod); //for display thread
-                //Thread.sleep(1000/60); //60 fps gamer style 8^)
-                //chart.updateXYSeries("received", data[0], data[1], null);
-                //sw.repaintChart();
+
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -109,6 +116,8 @@ public class WavePlaya implements Runnable{
 
     double[][] data;
     DataInputStream in;
+
+    String graphTitle;
 
     int graphUpdatePeriod;
     int dataUpdatePeriod;
